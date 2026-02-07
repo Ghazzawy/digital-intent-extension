@@ -77,24 +77,40 @@ function detectCategory(url) {
  * Update time display - Get start time from storage and update every second
  */
 function updateTimeDisplay() {
+  console.log('updateTimeDisplay() called');
+  
   // Get the start time we saved in storage
   chrome.storage.local.get(['siteStartTime'], (result) => {
+    console.log('Storage result:', result);
+    
     let startTime = result.siteStartTime;
+    console.log('Retrieved startTime:', startTime);
     
     // If start time doesn't exist, save it NOW
     if (!startTime) {
       startTime = new Date().getTime();
       chrome.storage.local.set({ 'siteStartTime': startTime });
-      console.log('First visit - saved start time:', startTime);
+      console.log('First visit - saved new start time:', startTime);
     }
     
     // Update time display every 1 second (1000 milliseconds)
-    setInterval(() => {
+    const intervalId = setInterval(() => {
       const currentTime = new Date().getTime();
       const minutes = calculateElapsedMinutes(startTime, currentTime);
+      console.log('Updating - CurrentTime:', currentTime, 'StartTime:', startTime, 'Minutes:', minutes);
       document.getElementById('timeDisplay').textContent = minutes + ' min';
-      console.log('Updated time:', minutes, 'min');
     }, 1000);
+    
+    console.log('Interval started with ID:', intervalId);
   });
 }
 
+/**
+ * Calculate elapsed minutes from start time to current time
+ */
+function calculateElapsedMinutes(startTime, currentTime) {
+  let millisecondsPassed = currentTime - startTime;
+  let secondsPassed = millisecondsPassed / 1000;
+  let minutesPassed = secondsPassed / 60;
+  return Math.floor(minutesPassed);
+}
