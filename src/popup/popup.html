@@ -33,6 +33,38 @@
       <section class="controls">
         <button class="btn btn-toggle" id="toggleBtn">Extension: ON</button>
         <button class="btn btn-settings" id="settingsBtn">⚙️ Settings</button>
+        <button class="btn-reset" id="resetBtn">Reset Time</button>
+      </section>
+
+      <!-- Settings Panel (hidden by default) -->
+      <section id="settingsPanel" class="settings-panel" aria-hidden="true" style="display: none;">
+        <h3>Settings</h3>
+
+        <div class="settings-row">
+          <label for="remindersEnabled">Enable reminders</label>
+          <input type="checkbox" id="remindersEnabled">
+        </div>
+
+        <div class="settings-row">
+          <label for="reminderInterval">Reminder interval (minutes)</label>
+          <input type="number" id="reminderInterval" min="1" value="10">
+        </div>
+
+        <div class="settings-row">
+          <div class="categories-label">Enabled categories</div>
+          <div class="categories-list">
+            <label><input type="checkbox" class="category-checkbox" data-cat="social"> Social</label>
+            <label><input type="checkbox" class="category-checkbox" data-cat="education"> Education</label>
+            <label><input type="checkbox" class="category-checkbox" data-cat="entertainment"> Entertainment</label>
+            <label><input type="checkbox" class="category-checkbox" data-cat="productivity"> Productivity</label>
+            <label><input type="checkbox" class="category-checkbox" data-cat="news"> News</label>
+          </div>
+        </div>
+
+        <div class="settings-actions">
+          <button id="saveSettingsBtn" class="btn">Save</button>
+          <button id="closeSettingsBtn" class="btn btn-settings">Close</button>
+        </div>
       </section>
 
       <footer>
@@ -40,6 +72,9 @@
       </footer>
     </main>
   </div>
+
+  <!-- Toast notification (non-blocking) -->
+  <div id="toast" class="toast" aria-live="polite" role="status"></div>
 
   <script src="popup.js"></script>
 </body>
