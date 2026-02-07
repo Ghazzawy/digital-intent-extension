@@ -14,16 +14,25 @@
     </header>
     
     <main>
-      <section class="info-panel">
-        <h2>Hello Extension!</h2>
-        <p>Digital Intent Companion is running and monitoring your browsing.</p>
+      <!-- Current Website Section -->
+      <section class="current-site">
+        <div class="site-info">
+          <h2>Current Site</h2>
+          <p class="site-url" id="siteUrl">Loading...</p>
+          <p class="site-category" id="siteCategory">Detecting category...</p>
+        </div>
       </section>
 
-      <section class="stats">
-        <div class="stat-item">
-          <span class="label">Status:</span>
-          <span class="value">Active</span>
-        </div>
+      <!-- Time Spent Section -->
+      <section class="time-spent">
+        <h3>Time on This Site</h3>
+        <p class="time-display" id="timeDisplay">0 min</p>
+      </section>
+
+      <!-- Controls Section -->
+      <section class="controls">
+        <button class="btn btn-toggle" id="toggleBtn">Extension: ON</button>
+        <button class="btn btn-settings" id="settingsBtn">⚙️ Settings</button>
       </section>
 
       <footer>
