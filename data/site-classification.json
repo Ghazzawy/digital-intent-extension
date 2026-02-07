@@ -1,0 +1,60 @@
+{
+  "categories": {
+    "social": {
+      "label": "Social Media",
+      "color": "#FF6B6B",
+      "sites": [
+        "facebook.com",
+        "twitter.com",
+        "instagram.com",
+        "linkedin.com",
+        "reddit.com",
+        "tiktok.com"
+      ]
+    },
+    "education": {
+      "label": "Education",
+      "color": "#4ECDC4",
+      "sites": [
+        "coursera.org",
+        "udemy.com",
+        "khanacademy.org",
+        "github.com",
+        "stackoverflow.com",
+        "wikipedia.org"
+      ]
+    },
+    "entertainment": {
+      "label": "Entertainment",
+      "color": "#FFE66D",
+      "sites": [
+        "youtube.com",
+        "netflix.com",
+        "twitch.tv",
+        "spotify.com",
+        "hulu.com"
+      ]
+    },
+    "productivity": {
+      "label": "Productivity",
+      "color": "#95E1D3",
+      "sites": [
+        "gmail.com",
+        "google.com",
+        "notion.so",
+        "trello.com",
+        "asana.com"
+      ]
+    },
+    "news": {
+      "label": "News",
+      "color": "#A8E6CF",
+      "sites": [
+        "bbc.com",
+        "cnn.com",
+        "nytimes.com",
+        "guardian.com"
+      ]
+    }
+  }
+}
