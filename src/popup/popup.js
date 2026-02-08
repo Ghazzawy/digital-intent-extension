@@ -8,22 +8,24 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Load settings first, then initialize the popup UI and timer
   loadSettings(() => {
-    // Step 1: Get the current tab information
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      const currentTab = tabs[0];
-      const url = currentTab.url;
+    loadCategories(() => {
+      // Step 1: Get the current tab information
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        const currentTab = tabs[0];
+        const url = currentTab.url;
 
-      console.log('Current tab URL:', url);
+        console.log('Current tab URL:', url);
 
-      // Display the URL
-      document.getElementById('siteUrl').textContent = extractDomain(url);
+        // Display the URL
+        document.getElementById('siteUrl').textContent = extractDomain(url);
 
-      // Step 2: Detect the category based on the site classification
-      const category = detectCategory(url);
-      document.getElementById('siteCategory').textContent = `Category: ${category}`;
+        // Step 2: Detect the category based on the site classification
+        const categoryLabel = detectCategoryLabel(url);
+        document.getElementById('siteCategory').textContent = `Category: ${categoryLabel}`;
 
-      // Step 3: Update time display with REAL elapsed time (pass URL)
-      updateTimeDisplay(url);
+        // Step 3: Update time display with REAL elapsed time (pass URL)
+        updateTimeDisplay(url);
+      });
     });
   });
 
@@ -63,6 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
 let currentIntervalId = null;
 let currentDomain = null;
 let toastTimeoutId = null;
+let categoriesData = null;
 // User-configurable settings (loaded from storage)
 let userSettings = {
   remindersEnabled: true,
@@ -112,27 +115,60 @@ function extractDomain(url) {
 /**
  * Detect category from site classification JSON
  */
-function detectCategory(url) {
-  // Get the domain
-  const domain = extractDomain(url);
-  
-  // Site classifications (from data/site-classification.json)
-  const categories = {
-    'social': ['facebook.com', 'twitter.com', 'instagram.com', 'linkedin.com', 'reddit.com', 'tiktok.com'],
-    'education': ['coursera.org', 'udemy.com', 'khanacademy.org', 'github.com', 'stackoverflow.com', 'wikipedia.org'],
-    'entertainment': ['youtube.com', 'netflix.com', 'twitch.tv', 'spotify.com', 'hulu.com'],
-    'productivity': ['gmail.com', 'google.com', 'notion.so', 'trello.com', 'asana.com'],
-    'news': ['bbc.com', 'cnn.com', 'nytimes.com', 'bbc.co.uk']
-  };
+function loadCategories(cb) {
+  const url = chrome.runtime.getURL('data/site-classification.json');
+  fetch(url)
+    .then((response) => response.json())
+    .then((data) => {
+      categoriesData = data;
+    })
+    .catch((error) => {
+      console.warn('Failed to load site categories:', error);
+      categoriesData = null;
+    })
+    .finally(() => {
+      if (typeof cb === 'function') cb();
+    });
+}
 
-  // Check which category the domain belongs to
-  for (const [category, sites] of Object.entries(categories)) {
-    if (sites.some(site => domain.includes(site))) {
-      return category.charAt(0).toUpperCase() + category.slice(1);
+function getCategoriesSource() {
+  if (categoriesData && categoriesData.categories) return categoriesData.categories;
+  return null;
+}
+
+function detectCategoryKey(url) {
+  const domain = extractDomain(url);
+  const source = getCategoriesSource();
+
+  if (source) {
+    for (const [categoryKey, info] of Object.entries(source)) {
+      const sites = info && info.sites ? info.sites : [];
+      if (sites.some(site => domain.includes(site))) return categoryKey;
     }
   }
 
-  return 'Other';
+  // Fallback if JSON fails to load
+  const fallback = {
+    social: ['facebook.com', 'twitter.com', 'instagram.com', 'linkedin.com', 'reddit.com', 'tiktok.com'],
+    education: ['coursera.org', 'udemy.com', 'khanacademy.org', 'github.com', 'stackoverflow.com', 'wikipedia.org'],
+    entertainment: ['youtube.com', 'netflix.com', 'twitch.tv', 'spotify.com', 'hulu.com'],
+    productivity: ['gmail.com', 'google.com', 'notion.so', 'trello.com', 'asana.com'],
+    news: ['bbc.com', 'cnn.com', 'nytimes.com', 'bbc.co.uk']
+  };
+
+  for (const [categoryKey, sites] of Object.entries(fallback)) {
+    if (sites.some(site => domain.includes(site))) return categoryKey;
+  }
+
+  return 'other';
+}
+
+function detectCategoryLabel(url) {
+  const key = detectCategoryKey(url);
+  const source = getCategoriesSource();
+  if (source && source[key] && source[key].label) return source[key].label;
+  if (key === 'other') return 'Other';
+  return key.charAt(0).toUpperCase() + key.slice(1);
 }
 
 /**
@@ -188,8 +224,8 @@ function updateTimeDisplay(url) {
 
         // Reminder logic using loaded userSettings
         if (userSettings.remindersEnabled) {
-          const category = detectCategory(url).toLowerCase();
-          const enabled = userSettings.enabledCategories[category];
+          const categoryKey = detectCategoryKey(url);
+          const enabled = userSettings.enabledCategories[categoryKey];
           if (enabled && !sentReminders[domain] && minutes >= userSettings.reminderInterval) {
             // Send reminder
             showToast(`Reminder: ${domain} — ${minutes} min spent`);
